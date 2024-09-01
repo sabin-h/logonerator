@@ -1,0 +1,64 @@
+const form = document.getElementById('logo-form');
+const logoContainer = document.getElementById('logo-container');
+
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const prompt = document.getElementById('prompt').value;
+    const resolution = document.getElementById('resolution').value;
+    const style = document.getElementById('style').value;
+
+    logoContainer.innerHTML = 'Generating logos...';
+
+    try {
+        // Simulating API call to a generative AI platform
+        const logos = await generateLogos(prompt, resolution, style);
+        displayLogos(logos);
+    } catch (error) {
+        logoContainer.innerHTML = 'Error generating logos. Please try again.';
+    }
+});
+
+async function generateLogos(prompt, resolution, style) {
+    // This is a mock function. In a real application, you would make an API call to a generative AI platform.
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const logos = Array(5).fill().map((_, i) => ({
+                id: i + 1,
+                url: `https://picsum.photos/${resolution.split('x')[0]}?random=${i}`,
+                alt: `Generated logo ${i + 1} based on prompt: ${prompt}, style: ${style}`
+            }));
+            resolve(logos);
+        }, 2000);
+    });
+}
+
+function displayLogos(logos) {
+    logoContainer.innerHTML = '';
+    logos.forEach(logo => {
+        const logoItem = document.createElement('div');
+        logoItem.className = 'logo-item';
+        logoItem.innerHTML = `
+            <img src="${logo.url}" alt="${logo.alt}" width="200" height="200">
+            <button class="download-btn" data-url="${logo.url}" data-id="${logo.id}">Download PNG</button>
+        `;
+        logoContainer.appendChild(logoItem);
+    });
+
+    // Add event listeners to download buttons
+    document.querySelectorAll('.download-btn').forEach(btn => {
+        btn.addEventListener('click', downloadLogo);
+    });
+}
+
+async function downloadLogo(e) {
+    const url = e.target.dataset.url;
+    const id = e.target.dataset.id;
+    try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        saveAs(blob, `logo_${id}.png`);
+    } catch (error) {
+        console.error('Error downloading logo:', error);
+        alert('Error downloading logo. Please try again.');
+    }
+}
